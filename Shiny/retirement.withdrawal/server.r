@@ -1,11 +1,26 @@
 library(shiny)
 
+paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
+	"annual_inflation", "annual_inf_std_dev", "monthly_withdrawals", "n_obs",
+	"n_sim")
+
 # Define server logic required to generate and plot a random distribution
 #
 # Idea and original code by Pierre Chretien
 # Small updates by Michael Kapler 
 #
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+
+	getParams <- function(prefix) {
+
+		input[[paste0(prefix, "_recalc")]]
+
+		params <- lapply(paramNames, function(p) {
+			input[[paste0(prefix, "_", p)]]
+		})
+		names(params) <- paramNames
+		params
+	}
 
   # Function that generates scenarios and computes NAV. The expression
   # is wrapped in a call to reactive to indicate that:
@@ -13,30 +28,32 @@ shinyServer(function(input, output) {
   #  1) It is "reactive" and therefore should be automatically 
   #     re-executed when inputs change
   #
-  getNav <- reactive({ 
+  getNav <- function(prefix) {
+
+  params <- getParams(prefix)
 	#-------------------------------------
 	# Inputs
 	#-------------------------------------
 	
 	# Initial capital
-	start.capital = input$start.capital
+	start.capital = params$start_capital
 	
 	# Investment
-	annual.mean.return = input$annual.mean.return / 100
-	annual.ret.std.dev = input$annual.ret.std.dev / 100
+	annual.mean.return = params$annual_mean_return / 100
+	annual.ret.std.dev = params$annual_ret_std_dev / 100
 	
 	# Inflation
-	annual.inflation = input$annual.inflation / 100
-	annual.inf.std.dev = input$annual.inf.std.dev / 100
+	annual.inflation = params$annual_inflation / 100
+	annual.inf.std.dev = params$annual_inf_std_dev / 100
 	
 	# Withdrawals
-	monthly.withdrawals = input$monthly.withdrawals
+	monthly.withdrawals = params$monthly_withdrawals
 	
 	# Number of observations (in Years)
-	n.obs = input$n.obs
+	n.obs = params$n_obs
 	
 	# Number of simulations
-	n.sim = input$n.sim
+	n.sim = params$n_sim
 	
 	#-------------------------------------
 	# Simulation
@@ -74,7 +91,7 @@ shinyServer(function(input, output) {
 	nav = nav / 1000000
 	
 	return(nav)  
-  })
+  }
   
   # Expression that plot NAV paths. The expression
   # is wrapped in a call to renderPlot to indicate that:
@@ -83,8 +100,7 @@ shinyServer(function(input, output) {
   #     re-executed when inputs change
   #  2) Its output type is a plot 
   #
-  output$distPlot <- renderPlot({
-	nav = getNav()
+  doRender <- function(nav) {
 
 	layout(matrix(c(1,2,1,3),2,2))
 	
@@ -112,6 +128,16 @@ shinyServer(function(input, output) {
 	plot(density(final.nav, from=0, to=max(final.nav)), las = 1, xlab = 'Final Capital', 
 		main = paste('Distribution of Final Capital,', 100 * p.alive[last.period], '% are still paying'))
 	grid()	
+  }
+
+  navA <- reactive(getNav("a"))
+  navB <- reactive(getNav("b"))
+
+  output$a_distPlot <- renderPlot({
+  	doRender(navA())
   })
-		
+  output$b_distPlot <- renderPlot({
+  	doRender(navB())
+  })
+
 })
