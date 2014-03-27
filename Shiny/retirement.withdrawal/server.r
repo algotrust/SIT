@@ -115,10 +115,13 @@ plot_nav <- function(nav) {
 
   layout(matrix(c(1,2,1,3),2,2))
 
-  # plot all scenarios
-  matplot(nav, type = 'l', las = 1, xlab = 'Months', ylab = 'Millions',
-    main = 'Projected Value of initial capital')
+  palette(c("black", "grey50", "grey30", "grey70", "#d9230f"))
 
+  # plot all scenarios
+  matplot(nav,
+    type = 'l', lwd = 0.5, lty = 1, col = 1:5,
+    xlab = 'Months', ylab = 'Millions',
+    main = 'Projected Value of Initial Capital')
 
   # plot % of scenarios that are still paying
   p.alive = 1 - rowSums(is.na(nav)) / ncol(nav)
