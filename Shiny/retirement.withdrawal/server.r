@@ -27,8 +27,8 @@ shinyServer(function(input, output, session) {
   #  1) It is "reactive" and therefore should be automatically
   #     re-executed when inputs change
   #
-  navA <- reactive(simulate_nav(getParams("a")))
-  navB <- reactive(simulate_nav(getParams("b")))
+  navA <- reactive(do.call(simulate_nav, getParams("a")))
+  navB <- reactive(do.call(simulate_nav, getParams("b")))
 
   # Expression that plot NAV paths. The expression
   # is wrapped in a call to renderPlot to indicate that:
@@ -46,30 +46,33 @@ shinyServer(function(input, output, session) {
 
 })
 
-simulate_nav <- function(params) {
+simulate_nav <- function(start_capital, annual_mean_return, annual_ret_std_dev,
+                         annual_inflation, annual_inf_std_dev,
+                         monthly_withdrawals, n_obs, n_sim) {
   #-------------------------------------
   # Inputs
   #-------------------------------------
 
   # Initial capital
-  start.capital = params$start_capital
+  start.capital = start_capital
 
   # Investment
-  annual.mean.return = params$annual_mean_return / 100
-  annual.ret.std.dev = params$annual_ret_std_dev / 100
+  annual.mean.return = annual_mean_return / 100
+  annual.ret.std.dev = annual_ret_std_dev / 100
 
   # Inflation
-  annual.inflation = params$annual_inflation / 100
-  annual.inf.std.dev = params$annual_inf_std_dev / 100
+  annual.inflation = annual_inflation / 100
+  annual.inf.std.dev = annual_inf_std_dev / 100
 
   # Withdrawals
-  monthly.withdrawals = params$monthly_withdrawals
+  monthly.withdrawals = monthly_withdrawals
 
   # Number of observations (in Years)
-  n.obs = params$n_obs
+  n.obs = n_obs
 
   # Number of simulations
-  n.sim = params$n_sim
+  n.sim = n_sim
+
 
   #-------------------------------------
   # Simulation
