@@ -46,9 +46,10 @@ shinyServer(function(input, output, session) {
 
 })
 
-simulate_nav <- function(start_capital, annual_mean_return, annual_ret_std_dev,
-                         annual_inflation, annual_inf_std_dev,
-                         monthly_withdrawals, n_obs, n_sim) {
+simulate_nav <- function(start_capital = 2000000, annual_mean_return = 5.0,
+                         annual_ret_std_dev = 7.0, annual_inflation = 2.5,
+                         annual_inf_std_dev = 1.5, monthly_withdrawals = 1000,
+                         n_obs = 20, n_sim = 200) {
   #-------------------------------------
   # Inputs
   #-------------------------------------
